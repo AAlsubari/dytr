@@ -1,0 +1,7 @@
+include LICENSE
+include NOTICE
+include README.md
+include pyproject.toml
+recursive-include src/dytr *.py
+recursive-include src/dytr *.json
+recursive-include src/dytr *.txt
