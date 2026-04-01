@@ -299,8 +299,6 @@ Apache License 2.0
 
 **Dr. Akram Alsubari**
 
-- akram.alsubari@outlook.com
-- akram.alsubari87@gmail.com
 
 ## Contributing
 
