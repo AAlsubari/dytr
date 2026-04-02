@@ -27,7 +27,7 @@ pip install dytr
 ## Quick Start
 
 ```python
-from dytr import DynamicTransformer, ModelConfig, TaskConfig, TrainingStrategy, Trainer SingleDatasetProcessing
+from dytr import DynamicTransformer, ModelConfig, TaskConfig, TrainingStrategy, Trainer, SingleDatasetProcessing
 import pandas as pd
 
 # 1. Configure your transformer
@@ -66,7 +66,7 @@ task = TaskConfig(
 # Initialize trainer and train
 trainer = Trainer(model, config, exp_dir="./experiments")
 train_datasets = {"sentiment_analysis": (train_dataset, TrainingStrategy.SENTENCE_CLASSIFICATION)}
-model = trainer.train([classification_task], train_datasets, {})# you can set more than one for list of tasks and dataset for multitasks training 
+model = trainer.train([task], train_datasets, {})# you can set more than one for list of tasks and dataset for multitasks training 
 
 # 4. Generate predictions
 result = model.generate("This product is amazing!", task_name="sentiment_analysis")
