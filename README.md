@@ -121,12 +121,12 @@ Load powerful encoders as your backbone and extend them with tasks:
 
 ```python
 from dytr import PretrainedModelLoader
-
+model_name='prajjwal1/bert-tiny'
 loader = PretrainedModelLoader()
-config = ModelConfig(tokenizer_name='bert-base-uncased',per_device_train_batch_size=32,num_train_epochs=3,per_device_eval_batch_size=8,special_tokens={},use_task_adapters=False,use_ewc=True,use_replay=True,use_rotary_embedding=False, training_from_scratch=False)
+config = ModelConfig(tokenizer_name=model_name, per_device_train_batch_size=32, num_train_epochs=3, per_device_eval_batch_size=8, special_tokens={}, use_task_adapters=False, use_ewc=True, use_replay=True, use_rotary_embedding=False, training_from_scratch=False)
 
 # Load pretrained BERT as your encoder
-model = loader.load_pretrained('bert-base-uncased', config)
+model = loader.load_pretrained(model_name, config)
 
 # Now add your own tasks - the model is fully dytr compatible
 class_train = pd.DataFrame(
