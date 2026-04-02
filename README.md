@@ -188,8 +188,7 @@ train_datasets = {
         classification_task.task_name: (class_dataset, classification_task.training_strategy),
         lm_task.task_name: (lm_dataset, lm_task.training_strategy),
     }
-
-    val_datasets = {
+val_datasets = {
         #classification_task.task_name: (class_val_dataset, classification_task.training_strategy)
     }
 
