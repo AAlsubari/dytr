@@ -175,6 +175,8 @@ class Trainer:
         self.logger.info("Starting training session")
         self.logger.info("=" * 60)
         training_task_names = list(train_datasets.keys())
+        encoder_unfreeze = not all(train_datasets[i][1] == "causal_lm" for i in train_datasets.keys())
+        
         self.logger.debug(f"Task configs: {[tc.task_name for tc in task_configs]}")
         self.logger.debug(f"Train datasets: {training_task_names}")
         self.logger.debug(f"Val datasets: {list(val_datasets.keys())}")
@@ -185,7 +187,7 @@ class Trainer:
             if task_config.task_name not in self.num_labels_per_task:
                 self.num_labels_per_task[task_config.task_name]=task_config.num_labels
         
-        self.unfreeze_for_tasks(training_task_names)
+        self.unfreeze_for_tasks(training_task_names,encoder_unfreeze)
         if len(train_datasets.keys())<1:
             self.logger.error("No training datasets found for tasks!")
             return self.model
