@@ -170,7 +170,9 @@ class MultiTaskDataset(Dataset):
     def __init__(self, datasets_dict, tokenizer, task_configs):
         self.datasets = []
         self.task_names = []
-        self.max_lengths = {t.task_name: t.max_length for t in task_configs}
+        self.max_lengths ={t:datasets_dict[t][0].max_len for t in datasets_dict.keys() }
+        
+        #self.max_lengths = {t.task_name: t.max_length for t in task_configs}
         self.strategies = []
         self.cumulative_sizes = [0]
 
