@@ -294,6 +294,10 @@ class Trainer:
 
         scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
         best_model_path = os.path.join(self.exp_dir, "best_model.pt")
+        steps=0
+
+
+
 
         # Training loop
         for epoch in range(self.config.num_train_epochs):
@@ -360,8 +364,13 @@ class Trainer:
                         # Add EWC penalty if enabled
                         if self.config.use_ewc and len(self.model.ewc_penalties) > 0:
                             ewc_loss = 0
-                            for ewc in self.model.ewc_penalties.values():
-                                ewc_loss += ewc.penalty(self.model)
+                            for ts in self.model.ewc_penalties.keys():
+                                if ts in training_task_names:
+                                    continue
+                                ewc_loss += self.model.ewc_penalties[ts].penalty(self.model)
+                                
+                            #for ewc in self.model.ewc_penalties.values():
+                            #    ewc_loss += ewc.penalty(self.model)
                             loss = loss + self.config.ewc_lambda * ewc_loss
 
                         if torch.isfinite(loss):
@@ -375,6 +384,7 @@ class Trainer:
 
                             total_loss += loss.item()
                             num_batches += 1
+                            steps+=1
                             self.loss_history.append(loss.item())
                             task_losses[task_name].append(loss.item())
 
@@ -389,7 +399,7 @@ class Trainer:
                             self.logger.warning(f"  Warning: Non-finite loss at batch {batch_idx}: {loss}")
 
                     # Logging
-                    if num_batches % self.config.logging_steps == 0 and num_batches > 0:
+                    if steps % self.config.logging_steps == 0 and num_batches > 0:
                         task_avg = {
                             task: sum(losses[-100:]) / len(losses[-100:])
                             for task, losses in task_losses.items()
@@ -402,7 +412,7 @@ class Trainer:
                     # Validation during training (if steps strategy)
                     if (
                         self.config.evaluation_strategy == "steps"
-                        and num_batches % self.config.validation_check_interval == 0
+                        and steps % self.config.validation_check_interval == 0
                         and num_batches > 0
                         and val_loader is not None
                     ):
