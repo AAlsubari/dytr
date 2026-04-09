@@ -49,7 +49,7 @@ class ModelConfig:
     embed_dim: int = 256
     num_layers: int = 6
     num_heads: int = 8
-    head_dim: int = 64
+    head_dim: int = 256//8 # embed_dim//num_heads
     ff_mult: int = 4
     dropout: float = 0.1
     max_seq_len: int = 256
@@ -104,11 +104,11 @@ class ModelConfig:
     # Special tokens
     special_tokens: Dict[str, str] = field(
         default_factory=lambda: {
-            "task_sep": "<|tasksep|>",
-            "doc_sep": "<|docsep|>",
-            "answer_start": "<|answer|>",
-            "bos": "<s>",
-            "eos": "</s>",
+            #"task_sep": "<|tasksep|>",
+            #"doc_sep": "<|docsep|>",
+            #"answer_start": "<|answer|>",
+            #"bos": "<s>",
+            #"eos": "</s>",
         }
     )
 
@@ -131,15 +131,15 @@ class ModelConfig:
     use_task_adapters: bool = True
     ewc_lambda: float = 1000.0
     replay_buffer_size: int = 1000
-    use_ewc: bool = True
-    use_replay: bool = True
+    use_ewc: bool = False
+    use_replay: bool = False
 
     # Task-specific learning rate multipliers
     causal_lm_window_size: int = 256
     causal_lm_stride: int = 128
     head_lr_mult: float = 1.0 # Learning rate multiplier for task heads
     decoder_lr_mult: float = 1.0  # Learning rate multiplier for task decoders
-    shared_lr_mult: float = 0.1 # Learning rate multiplier for shared components
+    shared_lr_mult: float = 0.5 # Learning rate multiplier for shared components
     
 
     # Device
