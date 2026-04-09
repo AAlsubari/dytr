@@ -140,6 +140,17 @@ class DynamicTransformer(nn.Module):
     def __init__(self, config: ModelConfig):
         super().__init__()
         self.current_tasks = {}
+        expected_head_dim = config.embed_dim // config.num_heads
+        if config.embed_dim % config.num_heads != 0:
+            raise ValueError(
+                f"embed_dim ({config.embed_dim}) must be divisible by num_heads ({config.num_heads})"
+            )
+        if config.head_dim != expected_head_dim:
+            print(f"\n⚠️ WARNING: head_dim ({config.head_dim}) does not match expected value ({expected_head_dim})")
+            
+            print(f"   Formula: embed_dim ({config.embed_dim}) // num_heads ({config.num_heads}) = {expected_head_dim}")
+            print(f"   Continuing with user-specified value: {config.head_dim}")
+            print("   (This may cause unexpected behavior)")
         self.config = config
 
         # Initialize tokenizer (try HuggingFace first, fallback to SimpleTokenizer)
