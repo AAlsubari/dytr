@@ -73,7 +73,7 @@ class Trainer:
         self.loss_history = []
         self.num_labels_per_task={}
         self.val_loss_history = []
-        self.metrics_history = defaultdict(list)
+        self.metrics_history = []
         self.logger.info("Trainer initialized")
         #self.logger.debug(f"Experiment directory: {exp_dir}")
         self.logger.debug("Device: %s ",self.config.device)
@@ -478,6 +478,7 @@ class Trainer:
         val_metrics = val_results["metrics"]
 
         self.val_loss_history.append(val_loss)
+        self.metrics_history.append(val_metrics)
         print(f"\n  Validation loss: {val_loss:.4f}")
 
         for task, metrics in val_metrics.items():
