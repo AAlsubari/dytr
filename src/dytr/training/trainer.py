@@ -467,7 +467,7 @@ class Trainer:
             for task_name in train_datasets.keys():
                 if task_name in self.model.ewc_penalties: continue
                 ewc = EWC(self.model, task_name, lambda_param=self.config.ewc_lambda)
-                fisher_loader = DataLoader(train_datasets[task_name][0], batch_size=self.config.per_device_train_batch_size // 4, shuffle=True, collate_fn=collate_fn)
+                fisher_loader = DataLoader(train_datasets[task_name][0], batch_size= 8, shuffle=True, collate_fn=collate_fn)
                 ewc.compute_fisher(fisher_loader, self.config.device)
                 self.model.ewc_penalties[task_name] = ewc
         return self.model
