@@ -106,14 +106,16 @@ class PretrainedModelLoader:
         model_name_lower = model_name.lower()
         
         # Check by name first
-        if 'bert' in model_name_lower:
-            return 'bert'
+        if 'xlm-roberta' in model_name_lower:
+            return 'xlm'
         elif 'roberta' in model_name_lower:
             return 'roberta'
         elif 'distilbert' in model_name_lower:
             return 'distilbert'
         elif 'albert' in model_name_lower:
             return 'albert'
+        elif 'bert' in model_name_lower:
+            return 'bert'
         elif 'gpt' in model_name_lower:
             return 'gpt2'
         elif 't5' in model_name_lower:
@@ -174,11 +176,10 @@ class PretrainedModelLoader:
                 try:
                     self._download_file(url, filepath)
                 except:
-                    while True:
-                        print(f"Error on Downloading A file:\n {filename}\nplease downlaod it manualy and store it as following path:\n{filepath} ")
-                        input("press ENTER when completed .....")
-                        if filepath.exists():
-                            break
+                    
+                    print(f"Error on Downloading A file:\n {filename}\nplease downlaod it manualy and store it as following path:\n{filepath} ")
+                    input("press ENTER when completed .....")
+                    continue 
                     
                     
             else:
@@ -777,8 +778,8 @@ class PretrainedModelLoader:
             'roberta': [
                 'roberta-base',             # 12 layers, 768 dim (~125M params)
                 'roberta-large',            # 24 layers, 1024 dim (~355M params)
-                'xlm-roberta-base',         # Multilingual RoBERTa
-                'xlm-roberta-large'         # Large multilingual
+                #'xlm-roberta-base',         # Multilingual RoBERTa
+                #'xlm-roberta-large'         # Large multilingual
             ],
             'distilbert': [
                 'distilbert-base-uncased',  # 6 layers, 768 dim (~66M params)
