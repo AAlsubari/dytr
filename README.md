@@ -19,6 +19,11 @@ dytr is a flexible PyTorch library for multi-task learning with dynamic transfor
 - 📦 **Pretrained Support** - Load BERT, RoBERTa, and more as your encoder backbone and fine tune it on multiple tasks.
 - 
 
+## Architecture Overview
+
+
+![unnamed](https://cdn-uploads.huggingface.co/production/uploads/645a5b8e333fb1835783d500/TdQZhE7EPeGU9zgYJMKbl.png)
+
 ## Installation
 
 ```bash
@@ -234,28 +239,8 @@ config = ModelConfig(
 )
 ```
 
-## Architecture Overview
 
-```
-┌─────────────────────────────────────────┐
-│         DynamicTransformer              │
-├─────────────────────────────────────────┤
-│  ┌─────────────────────────────────┐   │
-│  │     Shared Encoder               │   │
-│  │  (Pretrained or from scratch)    │   │
-│  └─────────────────────────────────┘   │
-│                  │                      │
-│    ┌─────────────┼─────────────┐        │
-│    ▼             ▼             ▼        │
-│ ┌──────┐    ┌──────┐    ┌──────┐       │
-│ │Task 1│    │Task 2│    │Task 3│       │
-│ │ Head │    │ Head │    │Decoder│      │
-│ └──────┘    └──────┘    └──────┘       │
-│    │           │           │            │
-│    ▼           ▼           ▼            │
-│Classification  NER    Generation       │
-└─────────────────────────────────────────┘
-```
+
 
 
 
