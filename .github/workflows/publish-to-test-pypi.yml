@@ -1,0 +1,36 @@
+name: Publish to Test PyPI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(grep -oP '__version__ = "\K[^"]+' src/dytr/__init__.py)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Build
+        run: |
+          pip install build
+          python -m build
+      
+      - name: Publish to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          password: ${{ secrets.PYPI_TEST_TOKEN }}
+      
+      - name: Test installation
+        run: |
+          pip install --index-url https://test.pypi.org/simple/ dytr==${{ steps.version.outputs.version }}
+          python -c "import dytr; print(f'✅ dytr v{dytr.__version__} on Test PyPI')"
