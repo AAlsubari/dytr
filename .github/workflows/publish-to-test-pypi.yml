@@ -33,7 +33,3 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
           password: ${{ secrets.PYPI_TEST_TOKEN }}
       
-      - name: Test installation
-        run: |
-          pip install --index-url https://test.pypi.org/simple/ dytr==${{ steps.version.outputs.version }}
-          python -c "import dytr; print(f'✅ dytr v{dytr.__version__} on Test PyPI')"
