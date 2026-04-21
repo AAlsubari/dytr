@@ -67,13 +67,14 @@ class Trainer:
         self.device = config.device
         self.exp_dir = Path(exp_dir)
         self.exp_dir.mkdir(parents=True, exist_ok=True)
-        self.best_val_loss = model.best_val_loss
+        self.best_val_loss = float('inf')
         self.best_metrics = {}
         self.patience_counter = 0
         self.loss_history = []
         self.num_labels_per_task={}
         self.val_loss_history = []
         self.metrics_history = []
+        self.fisher_batch_size=8
         self.logger.info("Trainer initialized")
         #self.logger.debug(f"Experiment directory: {exp_dir}")
         self.logger.debug("Device: %s ",self.config.device)
@@ -467,7 +468,7 @@ class Trainer:
             for task_name in train_datasets.keys():
                 if task_name in self.model.ewc_penalties: continue
                 ewc = EWC(self.model, task_name, lambda_param=self.config.ewc_lambda)
-                fisher_loader = DataLoader(train_datasets[task_name][0], batch_size= 8, shuffle=True, collate_fn=collate_fn)
+                fisher_loader = DataLoader(train_datasets[task_name][0], batch_size= self.fisher_batch_size, shuffle=True, collate_fn=collate_fn)
                 ewc.compute_fisher(fisher_loader, self.config.device)
                 self.model.ewc_penalties[task_name] = ewc
         return self.model
