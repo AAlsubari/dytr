@@ -178,6 +178,10 @@ class SingleDatasetProcessing(Dataset):
 
     def _process_token_classification(self, tags_column):
         """Process data for token classification."""
+        if isinstance(self.df[text_column].iloc[0], list):
+            self.df[text_column] = self.df[text_column].apply(lambda x: ' '.join(map(str, x)))
+        if isinstance(self.df[tags_column].iloc[0], list):
+            self.df[tags_column] = self.df[tags_column].apply(lambda x: ' '.join(map(str, x)))
         if not self.label_to_ids:
             self.df, self.label_to_ids, _=process_tags_column(self.df, tags_column)
         else:
@@ -192,6 +196,8 @@ class SingleDatasetProcessing(Dataset):
                 for tag in tags:
                     all_tags.add(int(tag))
         all_tags = sorted(all_tags)"""
+        print("for validation data please do consider to pass token_train_data.labellabel_to_ids as input for SingleDatasetProcessing ")
+        
         self.num_labels = max(self.label_to_ids.values())+1 #len(all_tags)
 
         valid_samples = 0
