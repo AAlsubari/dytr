@@ -58,6 +58,7 @@ from dytr.training.utils import process_qa_dataset, set_seed
 from dytr.utils.caching import CacheManager, get_cache_manager
 from dytr.utils.logging import get_logger, set_log_level, disable_logging
 
+from dytr.training.lora import LoRATrainer, LoRAWrapper, MultiTaskLoRAWrapper
 
 # Define what gets imported with "from dynamic_transformers import *"
 __all__ = [
@@ -98,5 +99,8 @@ __all__ = [
     "__author__",
     "__email__",
     "__license__",
+    "LoRATrainer",
+    "LoRAWrapper",
+    "MultiTaskLoRAWrapper",
 ]
 
