@@ -178,8 +178,8 @@ class SingleDatasetProcessing(Dataset):
 
     def _process_token_classification(self, tags_column):
         """Process data for token classification."""
-        if isinstance(self.df[text_column].iloc[0], list):
-            self.df[text_column] = self.df[text_column].apply(lambda x: ' '.join(map(str, x)))
+        if isinstance(self.df[self.text_column].iloc[0], list):
+            self.df[self.text_column] = self.df[self.text_column].apply(lambda x: ' '.join(map(str, x)))
         if isinstance(self.df[tags_column].iloc[0], list):
             self.df[tags_column] = self.df[tags_column].apply(lambda x: ' '.join(map(str, x)))
         if not self.label_to_ids:
