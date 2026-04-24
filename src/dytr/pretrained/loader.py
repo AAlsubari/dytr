@@ -49,24 +49,24 @@ class PretrainedModelLoader:
         try:
             if architecture == "encoder_only":
                 model, _ = self._load_encoder_only(model_name, config, config_override)
-                return model, None
+                return model#, None
 
             elif architecture == "decoder_only":
                 model, task_config = self._load_decoder_only(model_name, config, config_override)
-                return model, task_config
+                return model#, task_config
 
             elif architecture == "encoder_decoder":
                 if load_mode == "encoder_only":
                     model, _ = self._load_encoder_only(model_name, config, config_override)
-                    return model, None
+                    return model#, None
                 else:
                     model, task_config = self._load_encoder_decoder(model_name, config, config_override)
-                    return model, task_config
+                    return model#, task_config
 
             else:
                 print(f"Unknown architecture: {architecture}, trying encoder_only mode")
                 model, _ = self._load_encoder_only(model_name, config, config_override)
-                return model, None
+                return model#, None
 
         except Exception as e:
             print(f"Error loading model: {e}")
