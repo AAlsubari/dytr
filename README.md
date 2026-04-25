@@ -10,6 +10,39 @@ dytr is a flexible PyTorch library for multi-task learning with dynamic transfor
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/AAlsubari/dytr/blob/main/dytr_bert_finetune_demo.ipynb)
 
 **Build dynamic transformers that learn multiple tasks.**
+## 🚀 What's New in v0.1.3
+
+### ✨ Universal Pretrained Model Loader
+Load ANY model architecture directly:
+
+| Architecture | Supported Models | Loads As |
+|--------------|-----------------|----------|
+| **Encoder-only** | BERT, RoBERTa, DistilBERT, ALBERT | Shared encoder |
+| **Decoder-only** | GPT-2, LLaMA, Mistral, Phi, Gemma, Qwen | Causal LM task |
+| **Encoder-decoder** | T5, BART, MT5, Pegasus, Flan-T5 | Seq2Seq task |
+
+```python
+from dytr import PretrainedModelLoader
+
+loader = PretrainedModelLoader()
+model = loader.load_pretrained("gpt2", task_name="text_generation")
+```
+
+### 🔧 LoRA Training Support
+
+| Mode | Description |
+|--------------|-----------------|
+| **Single** | One LoRA adapter across all tasks |
+| **Multi-Task** | Separate LoRA adapters per task |
+| **Progressive** | 4-phase training (Warmup → Expansion → Hybrid → Native) |
+
+```python
+from dytr.training.lora import LoRATrainer
+
+trainer = LoRATrainer(model, config, mode="multi", rank=8)
+model = trainer.train(task_configs, train_datasets, val_datasets)
+```
+
 ## Why dytr?
 
 - 🎯 **Multi-Task Ready** - Train classification, generation, and sequence tasks in one model
@@ -17,7 +50,7 @@ dytr is a flexible PyTorch library for multi-task learning with dynamic transfor
 - 🔧 **No Black Box** - Full control over architecture, understand every component
 - ⚡ **Lightweight** - Pure PyTorch, minimal dependencies
 - 📦 **Pretrained Support** - Load BERT, RoBERTa, and more as your encoder backbone and fine tune it on multiple tasks.
-- 
+- 🔧 **LoRA Support** - Parameter-efficient fine-tuning with fewer parameters
 
 ## Architecture Overview
 
@@ -28,6 +61,9 @@ dytr is a flexible PyTorch library for multi-task learning with dynamic transfor
 
 ```bash
 pip install dytr
+```
+```bash
+pip install git+https://github.com/AAlsubari/dytr.git
 ```
 
 ## Quick Start
@@ -120,6 +156,25 @@ for task in task_list:
     # Previous tasks remain accurate
     # The trainer automatically handles EWC and replay buffer, but you should add the samples to the pretrained model
 ```
+### Universal Pretrained Model Loader
+
+Load any model architecture as your backbone:
+
+```python
+from dytr import PretrainedModelLoader
+
+loader = PretrainedModelLoader()
+
+# Encoder-only (BERT) → Shared encoder
+model = loader.load_pretrained("bert-base-uncased")
+
+# Decoder-only (GPT-2) → Causal LM task
+model = loader.load_pretrained("gpt2", task_name="generation")
+
+# Encoder-decoder (T5) → Seq2Seq task
+model = loader.load_pretrained("t5-small", task_name="translation")
+```
+
 
 ### Pretrained Encoders
 
@@ -275,7 +330,8 @@ config = ModelConfig(
 - **ModelConfig**: Architecture, training, and continual learning parameters
 - **TaskConfig**: Dataset configuration, column mapping, task-specific settings
 - **TrainingStrategy**: Causal LM, Seq2Seq, Sentence Classification, Token Classification
-- **PretrainedModelLoader**: Load BERT, RoBERTa, DistilBERT, ALBERT as encoders
+- **PretrainedModelLoader**: Pretrain models loader for encoder-only, decoder-only, and encoder-decoder models
+- **LoRATrainer**: Parameter-efficient fine-tuning with single, multi-task, and progressive modes
 
 ## License
 
