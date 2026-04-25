@@ -7,6 +7,11 @@ on:
         description: 'Type "CONFIRM" to publish to PRODUCTION PyPI'
         required: true
         type: string
+      release_notes:
+        description: 'Release notes (what changed in this version)'
+        required: false
+        type: string
+        default: 'Bug fixes and improvements'
 
 permissions:
   contents: write
@@ -48,6 +53,8 @@ jobs:
           name: dytr v${{ steps.version.outputs.version }}
           body: |
             ## dytr v${{ steps.version.outputs.version }}
+            
+            ${{ github.event.inputs.release_notes }}
             
             ### Installation
             ```bash
