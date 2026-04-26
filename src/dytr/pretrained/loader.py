@@ -778,11 +778,11 @@ class PretrainedModelLoader:
             filepath = model_dir / tokenizer_file
             
             try:
-                response = requests.head(url, timeout=10)
-                if response.status_code != 200:
-                    continue
+                #response = requests.head(url, timeout=10)
+                #if response.status_code != 200:
+                #    continue
                 
-                print(f"Downloading {tokenizer_file}...")
+                #print(f"Downloading {tokenizer_file}...")
                 self._download_file(url, filepath)
                 
                 if tokenizer_file == 'vocab.txt':
