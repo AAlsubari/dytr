@@ -808,7 +808,7 @@ class PretrainedModelLoader:
                         tokenizer_data = json.load(f)
                     
                     if 'model' in tokenizer_data and 'vocab' in tokenizer_data['model']:
-                        vocab_dict = tokenizer_data['model']['vocab']
+                        vocab_dict = {t:id for id,t in enumerate(tokenizer_data['model']['vocab'])}
                         with open(str(vocab_path), 'w', encoding='utf-8') as f:
                             json.dump(vocab_dict, f, ensure_ascii=False, indent=2)
                         print(f"Built vocab.json from tokenizer.json ({len(vocab_dict)} tokens)")
