@@ -41,14 +41,9 @@ class ModelConfig:
     Contains all hyperparameters and settings for model architecture,
     training, and continual learning features.
     """
-
     # Architecture parameters
     embed_dim: int = 256 # Dimension of token embeddings and hidden states
-    # Controls model capacity: larger values = more parameters but better representation
-    # Common values: 128 (tiny), 256 (small), 512 (base), 768 (large), 1024 (xl)
-    # Impact: Quadratically increases total parameters (embed_dim² × layers)
-    # Trade-off: Higher = better accuracy but more memory and slower training
-    
+    
     num_layers: int = 6 # Number of transformer encoder/decoder layers stacked vertically
     # Each layer adds: Multi-Head Attention + Feed-Forward Network + Layer Norm
     # Common values: 2 (tiny), 4 (small), 6 (base), 12 (large), 24 (xl)
@@ -95,7 +90,7 @@ class ModelConfig:
     label_smoothing: float = 0.1
 
     # Advanced training features
-    fp16: bool = False ## still need to be implemented 
+    fp16: bool = False # still need to be implemented 
     gradient_accumulation_steps: int = 1
     max_grad_norm: float = 1.0
 
@@ -116,8 +111,8 @@ class ModelConfig:
     # Data loading
     per_device_train_batch_size: int = 8
     per_device_eval_batch_size: int = 8
-    dataloader_num_workers: int = 0 #
-    dataloader_pin_memory: bool = True # 
+    dataloader_num_workers: int = 0 
+    dataloader_pin_memory: bool = True  
 
     # Randomness
     seed: int = 42
