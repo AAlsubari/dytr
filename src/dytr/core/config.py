@@ -114,7 +114,7 @@ class ModelConfig:
     # Data loading
     per_device_train_batch_size: int = 8
     per_device_eval_batch_size: int = 8
-    dataloader_num_workers: int = 0 
+    dataloader_num_workers: int = 2 
     dataloader_pin_memory: bool = True  
 
     # Randomness
