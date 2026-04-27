@@ -16,10 +16,7 @@
 Configuration classes for Dynamic Transformers.
 
 This module defines the configuration dataclasses for model architecture,
-training parameters, and task-specific settings.
-
-Author: Akram Alsubari
-Email: akram.alsubari@outlook.com / akram.alsubari87@gmail.com
+training parameters, and task-specific settings
 """
 
 from dataclasses import dataclass, field
@@ -46,12 +43,44 @@ class ModelConfig:
     """
 
     # Architecture parameters
-    embed_dim: int = 256
-    num_layers: int = 6
-    num_heads: int = 8
-    head_dim: int = 256//8 # embed_dim//num_heads
-    ff_mult: int = 4
-    dropout: float = 0.1
+    embed_dim: int = 256 # Dimension of token embeddings and hidden states
+    # Controls model capacity: larger values = more parameters but better representation
+    # Common values: 128 (tiny), 256 (small), 512 (base), 768 (large), 1024 (xl)
+    # Impact: Quadratically increases total parameters (embed_dim² × layers)
+    # Trade-off: Higher = better accuracy but more memory and slower training
+    
+    num_layers: int = 6 # Number of transformer encoder/decoder layers stacked vertically
+    # Each layer adds: Multi-Head Attention + Feed-Forward Network + Layer Norm
+    # Common values: 2 (tiny), 4 (small), 6 (base), 12 (large), 24 (xl)
+    # Impact: Linearly increases parameters and inference time
+
+    num_heads: int = 8 # Number of parallel attention heads in Multi-Head Attention
+    # Must divide embed_dim evenly (embed_dim % num_heads == 0)
+    # Common values: 2, 4, 8, 12, 16
+    # Each head learns different attention patterns (position, syntax, semantics)
+    # Trade-off: More heads = richer representations but more computation
+
+
+    head_dim: int = 256//8 # embed_dim//num_heads 
+    # Dimension of each attention head's query, key, value vectors
+    # Calculated as embed_dim / num_heads (typically 64)
+    # Controls attention granularity: larger = more detailed relationships
+    # set it with caution 
+
+
+
+    ff_mult: int = 4 # Multiplier for Feed-Forward Network hidden dimension
+    # FFN hidden size = embed_dim × ff_mult
+    # Common values: 2, 3, 4, 6, 8
+    # Larger values = more capacity for pattern recognition
+    # FFN accounts for ~2/3 of total parameters, impacts memory significantly
+
+    dropout: float = 0.1 # Dropout rate for regularization (0.0 = no dropout, 1.0 = all dropped)
+    # Applied after attention and FFN layers
+    # Common values: 0.0, 0.1, 0.2, 0.3, 0.5
+    # Prevents overfitting: higher = more regularization but slower convergence
+    # Reduce if underfitting, increase if overfitting
+
     max_seq_len: int = 256
 
     # Training parameters
@@ -66,29 +95,29 @@ class ModelConfig:
     label_smoothing: float = 0.1
 
     # Advanced training features
-    fp16: bool = False
+    fp16: bool = False ## still need to be implemented 
     gradient_accumulation_steps: int = 1
     max_grad_norm: float = 1.0
 
     # Evaluation and checkpointing
     patience: int = 3
-    evaluation_strategy: str = "steps"
-    logging_steps: int = 50
-    validation_check_interval: int = 500
-    load_best_model_at_end: bool = True
-    metric_for_best_model: str = "loss"
+    evaluation_strategy: str = "epoch" #When to evaluate: "steps" or "epoch"
+    logging_steps: int = 20 
+    validation_check_interval: int = 100
+    load_best_model_at_end: bool = True # still not integrated 
+    metric_for_best_model: str = "loss" # currently only loss is implemented for saving best model due to different metrics to each task strategies 
     early_stopping_patience: int = 10
 
     # Training duration
-    max_train_steps: int = 100000
+    max_train_steps: int = 100000 # skipped
     num_train_epochs: int = 3
     lr_scheduler_type: str = "cosine"
 
     # Data loading
     per_device_train_batch_size: int = 8
     per_device_eval_batch_size: int = 8
-    dataloader_num_workers: int = 2
-    dataloader_pin_memory: bool = True
+    dataloader_num_workers: int = 0 #
+    dataloader_pin_memory: bool = True # 
 
     # Randomness
     seed: int = 42
@@ -99,7 +128,7 @@ class ModelConfig:
     use_rotary_embedding: bool = True
     use_flash_attention: bool = False
     gradient_checkpointing: bool = False
-    training_from_scratch: bool=False
+    training_from_scratch: bool=False # will be remove
 
     # Special tokens
     special_tokens: Dict[str, str] = field(
@@ -119,20 +148,21 @@ class ModelConfig:
 
     # Tokenizer IDs
     vocab_size: Optional[int] = None
-    tokenizer_name: str = "bert-base-multilingual-cased"
+    tokenizer_name: str = "bert-base-multilingual-cased" # it can be local tokenizer folder files, or path to vocab.json 
     add_tab_newline_vocab: bool= False
-    use_simple_tokenizer: bool = True
-    tokenizer_type: str = 'wordpiece'
+    use_simple_tokenizer: bool = True # use simple tokenizer without transformers library 
+    tokenizer_type: str = 'wordpiece' 
     bos_token_id: Optional[int] = None
     eos_token_id: Optional[int] = None
 
     # Continual learning
     adapter_bottleneck: int = 64
     use_task_adapters: bool = True
-    ewc_lambda: float = 1000.0
-    replay_buffer_size: int = 1000
-    use_ewc: bool = False
-    use_replay: bool = False
+    ewc_lambda: float = 1000.0 # EWC regularization strength. Higher = more protection of old tasks.
+    replay_buffer_size: int = 1000 # 🔧 OPTIONAL - Size of experience replay buffer.
+    use_ewc: bool = True # Enable Elastic Weight Consolidation.
+    # Note: Computes Fisher matrix after training, applies to future tasks. 
+    use_replay: bool = False # need for more test cases
 
     # Task-specific learning rate multipliers
     causal_lm_window_size: int = 256
