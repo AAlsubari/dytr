@@ -159,7 +159,7 @@ class ModelConfig:
     adapter_bottleneck: int = 64
     use_task_adapters: bool = True
     ewc_lambda: float = 1000.0 # EWC regularization strength. Higher = more protection of old tasks.
-    replay_buffer_size: int = 1000 # 🔧 OPTIONAL - Size of experience replay buffer.
+    replay_buffer_size: int = 1000 # OPTIONAL - Size of experience replay buffer.
     use_ewc: bool = True # Enable Elastic Weight Consolidation.
     # Note: Computes Fisher matrix after training, applies to future tasks. 
     use_replay: bool = False # need for more test cases
