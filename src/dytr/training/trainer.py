@@ -224,10 +224,10 @@ class Trainer:
                 # Use dynamic padding
                 return collate_fn(batch)
         
-        kwargs = self._get_dataloader_kwargs()
+        #kwargs = self._get_dataloader_kwargs()
         
         train_loader = DataLoader(
-            train_dataset, batch_sampler=train_sampler, collate_fn=train_collate, **kwargs
+            train_dataset, batch_sampler=train_sampler, collate_fn=train_collate, #**kwargs
         )
         
         if len(val_dataset) > 0:
