@@ -19,7 +19,6 @@ This module provides the Trainer class which handles training,
 validation, and continual learning features like EWC and experience replay.
 
 Author: Akram Alsubari
-Email: akram.alsubari@outlook.com / akram.alsubari87@gmail.com
 """
 
 
@@ -158,7 +157,18 @@ class Trainer:
         # Unfreeze each task's specific components
         for task_name in task_names:
             self.unfreeze_task_components(task_name)
-    
+    def _get_dataloader_kwargs(self):
+        """Get DataLoader kwargs based on device configuration"""
+        if self.config.device == 'cuda':
+            return {
+                'num_workers': self.config.dataloader_num_workers,
+                'pin_memory': self.config.dataloader_pin_memory
+            }
+        else:
+            return {
+                'num_workers': 0,
+                'pin_memory': False
+            }
     
     def train(self, task_configs: List[TaskConfig], train_datasets: Dict, val_datasets: Dict):
         """
@@ -213,9 +223,11 @@ class Trainer:
             else:
                 # Use dynamic padding
                 return collate_fn(batch)
-
+        
+        kwargs = self._get_dataloader_kwargs()
+        
         train_loader = DataLoader(
-            train_dataset, batch_sampler=train_sampler, collate_fn=train_collate, num_workers=0
+            train_dataset, batch_sampler=train_sampler, collate_fn=train_collate, **kwargs
         )
         
         if len(val_dataset) > 0:
@@ -456,7 +468,7 @@ class Trainer:
 
                     if self.patience_counter >= self.config.patience:
                         print(f"  Early stopping triggered after {epoch+1} Validation")
-                        response=input("Insert letter Y to stop the training: [Y/n]")
+                        response='Y' #input("Insert letter Y to stop the training: [Y/n]")
                         if response=='Y':
                             break
                         self.patience_counter=0
@@ -465,6 +477,8 @@ class Trainer:
         
         self.logger.debug(f"\n  Training completed. Best validation loss: {self.best_val_loss:.4f}")
         if self.config.use_ewc:# and use_fixed_padding:
+            print(" Applying EWC.... this may take several minutes ")
+            
             for task_name in train_datasets.keys():
                 if task_name in self.model.ewc_penalties: continue
                 ewc = EWC(self.model, task_name, lambda_param=self.config.ewc_lambda)
