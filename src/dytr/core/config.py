@@ -41,14 +41,19 @@ class ModelConfig:
     Contains all hyperparameters and settings for model architecture,
     training, and continual learning features.
     """
+    
     # Architecture parameters
+    
     embed_dim: int = 256 # Dimension of token embeddings and hidden states
-    
-    num_layers: int = 6 # Number of transformer encoder/decoder layers stacked vertically
-    # Each layer adds: Multi-Head Attention + Feed-Forward Network + Layer Norm
-    # Common values: 2 (tiny), 4 (small), 6 (base), 12 (large), 24 (xl)
-    # Impact: Linearly increases parameters and inference time
-
+    # Controls model capacity: larger values = more parameters but better representation
+    # Common values: 128 (tiny), 256 (small), 512 (base), 768 (large), 1024 (xl)
+    # Impact: Quadratically increases total parameters (embed_dim² × layers)
+    
+    num_layers: int =6  # Number of transformer encoder/decoder layers stacked vertically
+    # Each layer adds: Multi-Head Attention + Feed-Forward Network + Layer Norm
+    # Common values: 2 (tiny), 4 (small), 6 (base), 12 (large), 24 (xl)
+    # Impact: Linearly increases parameters and inference time
+    
     num_heads: int = 8 # Number of parallel attention heads in Multi-Head Attention
     # Must divide embed_dim evenly (embed_dim % num_heads == 0)
     # Common values: 2, 4, 8, 12, 16
@@ -58,26 +63,24 @@ class ModelConfig:
 
     head_dim: int = 256//8 # embed_dim//num_heads 
     # Dimension of each attention head's query, key, value vectors
-    # Calculated as embed_dim / num_heads (typically 64)
-    # Controls attention granularity: larger = more detailed relationships
+    # Calculated as embed_dim / num_heads (typically 64)
+    # Controls attention granularity: larger = more detailed relationships
     # set it with caution 
-
-
-
+    
+    
     ff_mult: int = 4 # Multiplier for Feed-Forward Network hidden dimension
-    # FFN hidden size = embed_dim × ff_mult
-    # Common values: 2, 3, 4, 6, 8
-    # Larger values = more capacity for pattern recognition
-    # FFN accounts for ~2/3 of total parameters, impacts memory significantly
+    # FFN hidden size = embed_dim × ff_mult
+    # Common values: 2, 3, 4, 6, 8
+    # Larger values = more capacity for pattern recognition
+    # FFN accounts for ~2/3 of total parameters, impacts memory significantly
 
     dropout: float = 0.1 # Dropout rate for regularization (0.0 = no dropout, 1.0 = all dropped)
-    # Applied after attention and FFN layers
-    # Common values: 0.0, 0.1, 0.2, 0.3, 0.5
-    # Prevents overfitting: higher = more regularization but slower convergence
-    # Reduce if underfitting, increase if overfitting
+    # Applied after attention and FFN layers,  Common values: 0.0, 0.1, 0.2, 0.3, 0.5. 
+    #Prevents overfitting: higher = more regularization but slower convergence
+    # Reduce if underfitting, increase if overfitting
 
     max_seq_len: int = 256
-
+    
     # Training parameters
     learning_rate: float = 3e-4
     batch_size: int = 16
