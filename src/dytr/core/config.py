@@ -146,7 +146,7 @@ class ModelConfig:
 
     # Tokenizer IDs
     vocab_size: Optional[int] = None
-    tokenizer_name: str = "bert-base-multilingual-cased" # it can be local tokenizer folder files, or path to vocab.json 
+    tokenizer_name: str = "alsubari/bert-base-multilingual-cased-dytr" # it can be local tokenizer folder files, or path to vocab.json 
     add_tab_newline_vocab: bool= False
     use_simple_tokenizer: bool = True # use simple tokenizer without transformers library 
     tokenizer_type: str = 'wordpiece' 
