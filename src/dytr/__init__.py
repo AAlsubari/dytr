@@ -20,7 +20,7 @@ A flexible PyTorch library for multi-task learning with transformer architecture
 
 """
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 __author__ = "Akram Alsubari"
 __email__ = "akram.alsubari@outlook.com"
 __license__ = "Apache 2.0"
