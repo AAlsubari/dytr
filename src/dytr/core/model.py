@@ -575,7 +575,7 @@ class DynamicTransformer(nn.Module):
                     }
 
         return prompt
-    def compute_ewc(self, task_name, dataset, strategy, fisher_batch_size=8):
+    def compute_ewc(self, task_name, dataset, fisher_batch_size=8):
         """Compute EWC for a specific task in-place."""
         from torch.utils.data import DataLoader
         #from dytr.memory.ewc import EWC
