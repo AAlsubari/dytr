@@ -577,6 +577,110 @@ class DynamicTransformer(nn.Module):
         return prompt
 
     def save_model(self, path: str):
+        """Save the entire model to disk including EWC and Replay Buffer."""
+        self.config.tasks = self.current_tasks
+        
+        # Prepare serializable EWC data
+        ewc_data = {}
+        if hasattr(self, 'ewc_penalties') and self.ewc_penalties:
+            for task_name, ewc in self.ewc_penalties.items():
+                ewc_data[task_name] = {
+                    'params': {n: p.cpu() for n, p in ewc.params.items()},
+                    'fisher': {n: f.cpu() for n, f in ewc.fisher.items()},
+                    'lambda_param': ewc.lambda_param
+                }
+        
+        # Prepare serializable Replay Buffer data
+        replay_data = None
+        if hasattr(self, 'replay_buffer') and self.replay_buffer and self.replay_buffer.buffer:
+            replay_data = {
+                'buffer': [(task, sample) for task, sample in self.replay_buffer.buffer],
+                'capacity': self.replay_buffer.capacity
+            }
+        
+        state = {
+            'model_state': self.state_dict(),
+            'config': self.config,
+            'current_tasks': self.current_tasks,
+            'training_step': self.training_step,
+            'best_val_loss': self.best_val_loss,
+            'steps_without_improvement': self.steps_without_improvement,
+            'ewc_data': ewc_data,
+            'replay_data': replay_data
+        }
+        torch.save(state, path)
+        print(f"✅ Model saved to {path}")
+        if ewc_data:
+            print(f"   Saved EWC for tasks: {list(ewc_data.keys())}")
+    
+    @classmethod
+    def load_model(cls, path: str, device: Optional[str] = None):
+        """Load a saved model from disk with full state restoration."""
+        try:
+            if not device:
+                device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            
+            state = torch.load(path, map_location=device, weights_only=False)
+            config = state['config']
+            config.device = device
+            
+            # Detect and fix max_seq_len mismatch for rotary cache
+            if 'model_state' in state:
+                for key in state['model_state'].keys():
+                    if 'rotary.cos_cached' in key:
+                        saved_seq_len = state['model_state'][key].shape[0]
+                        if saved_seq_len != config.max_seq_len:
+                            config.max_seq_len = saved_seq_len
+                        break
+            
+            model = cls(config)
+            
+            # Load model weights with strict=False (handles rotary cache)
+            model.load_state_dict(state['model_state'], strict=False)
+            
+            # Restore training state
+            model.current_tasks = state.get('current_tasks', {})
+            model.training_step = state.get('training_step', 0)
+            model.best_val_loss = state.get('best_val_loss', float('inf'))
+            model.steps_without_improvement = state.get('steps_without_improvement', 0)
+            
+            # Restore EWC penalties
+            ewc_data = state.get('ewc_data', {})
+            if ewc_data:
+                from dytr.memory.ewc import EWC
+                model.ewc_penalties = {}
+                for task_name, data in ewc_data.items():
+                    ewc = EWC(model, task_name, data['lambda_param'])
+                    ewc.params = {n: p.to(device) for n, p in data['params'].items()}
+                    ewc.fisher = {n: f.to(device) for n, f in data['fisher'].items()}
+                    model.ewc_penalties[task_name] = ewc
+                print(f"✅ Restored EWC for tasks: {list(ewc_data.keys())}")
+            
+            # Restore Replay Buffer
+            replay_data = state.get('replay_data',None)
+            if replay_data and hasattr(model, 'replay_buffer'):
+                from dytr.memory.replay import ReplayBuffer
+                from collections import defaultdict
+                model.replay_buffer = ReplayBuffer(replay_data['capacity'])
+                model.replay_buffer.buffer = replay_data['buffer']
+                model.replay_buffer.task_indices = defaultdict(list)
+                for idx, (task, _) in enumerate(replay_data['buffer']):
+                    model.replay_buffer.task_indices[task].append(idx)
+                print(f"✅ Restored Replay Buffer with {len(model.replay_buffer.buffer)} samples")
+            
+            # Rebuild rotary cache if needed
+            for layer in model.encoder.layers:
+                if hasattr(layer.attention, 'rotary'):
+                    layer.attention.rotary._build_cache(config.max_seq_len)
+            
+            return model.to(config.device)
+            
+        except Exception as e:
+            print(f"Error loading model: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+    def save_model_old(self, path: str):
         """Save the entire model to disk."""
         self.config.tasks = self.current_tasks
         state = {
@@ -592,7 +696,7 @@ class DynamicTransformer(nn.Module):
         torch.save(state, path)
 
     @classmethod
-    def load_model(cls, path: str, device: Optional[str] = None):
+    def load_model_old(cls, path: str, device: Optional[str] = None):
         """Load a saved model from disk."""
         try:
             if not device:
