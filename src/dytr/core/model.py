@@ -575,7 +575,34 @@ class DynamicTransformer(nn.Module):
                     }
 
         return prompt
-
+    def compute_ewc(self, task_name, dataset, strategy, fisher_batch_size=8):
+        """Compute EWC for a specific task in-place."""
+        from torch.utils.data import DataLoader
+        #from dytr.memory.ewc import EWC
+        from dytr.training.data import collate_fn
+        
+        if not hasattr(self, 'ewc_penalties'):
+            self.ewc_penalties = {}
+        
+        if task_name in self.ewc_penalties:
+            print(f"  EWC already exists for: {task_name}")
+            return
+        
+        print(f"  Computing EWC for: {task_name}")
+        
+        fisher_loader = DataLoader(
+            dataset, 
+            batch_size=fisher_batch_size, 
+            shuffle=True, 
+            collate_fn=collate_fn
+        )
+        
+        ewc = EWC(self, task_name, lambda_param=self.config.ewc_lambda)
+        ewc.compute_fisher(fisher_loader, self.config.device)
+        
+        self.ewc_penalties[task_name] = ewc
+        print(f"  ✓ EWC stored for: {task_name}")
+        
     def save_model(self, path: str):
         """Save the entire model to disk including EWC and Replay Buffer."""
         self.config.tasks = self.current_tasks
