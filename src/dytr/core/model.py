@@ -603,7 +603,7 @@ class DynamicTransformer(nn.Module):
         self.ewc_penalties[task_name] = ewc
         print(f"  ✓ EWC stored for: {task_name}")
         
-    def save_model(self, path: str):
+    def save_model_all(self, path: str):
         """Save the entire model to disk including EWC and Replay Buffer."""
         self.config.tasks = self.current_tasks
         
@@ -641,7 +641,7 @@ class DynamicTransformer(nn.Module):
             print(f"   Saved EWC for tasks: {list(ewc_data.keys())}")
     
     @classmethod
-    def load_model(cls, path: str, device: Optional[str] = None):
+    def load_model_all(cls, path: str, device: Optional[str] = None):
         """Load a saved model from disk with full state restoration."""
         try:
             if not device:
@@ -665,6 +665,7 @@ class DynamicTransformer(nn.Module):
             # Load model weights with strict=False (handles rotary cache)
             model.load_state_dict(state['model_state'], strict=False)
             
+
             # Restore training state
             model.current_tasks = state.get('current_tasks', {})
             model.training_step = state.get('training_step', 0)
@@ -707,7 +708,7 @@ class DynamicTransformer(nn.Module):
             import traceback
             traceback.print_exc()
             return None
-    def save_model_old(self, path: str):
+    def save_model(self, path: str):
         """Save the entire model to disk."""
         self.config.tasks = self.current_tasks
         state = {
@@ -723,23 +724,28 @@ class DynamicTransformer(nn.Module):
         torch.save(state, path)
 
     @classmethod
-    def load_model_old(cls, path: str, device: Optional[str] = None):
+    def load_model(cls, path: str, device: Optional[str] = None):
         """Load a saved model from disk."""
         try:
             if not device:
                 device = "cuda" if torch.cuda.is_available() else "cpu"
-
             state = torch.load(path, map_location=device, weights_only=False)
             config = state["config"]
             config.device = device
-
+            # Detect and fix max_seq_len mismatch for rotary cache
+            if 'model_state' in state:
+                for key in state['model_state'].keys():
+                    if 'rotary.cos_cached' in key:
+                        saved_seq_len = state['model_state'][key].shape[0]
+                        if saved_seq_len != config.max_seq_len:
+                            config.max_seq_len = saved_seq_len
+                        break
             model = cls(config)
             model.load_state_dict(state["model_state"], strict=False)
             model.current_tasks = state.get("current_tasks", {})
             model.training_step = state.get("training_step", 0)
             model.best_val_loss = state.get("best_val_loss", float("inf"))
             model.steps_without_improvement = state.get("steps_without_improvement", 0)
-
             return model.to(config.device)
         except Exception as e:
             print(f"Error loading model: {e}")
