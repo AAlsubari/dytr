@@ -377,7 +377,7 @@ class Trainer:
                         loss = outputs["loss"]
 
                         # Add EWC penalty if enabled
-                        if self.config.use_ewc and len(self.model.ewc_penalties) > 0:
+                        if len(self.model.ewc_penalties) > 0:
                             ewc_loss = 0
                             for ts in self.model.ewc_penalties.keys():
                                 if ts in training_task_names:
