@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dytr"
-version = "0.1.5"
+version = "0.1.4"
 description = "dytr: Dynamic Transformer for Multi-Task Learning with Continual Learning Support"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -87,8 +87,8 @@ include-package-data = true
 [tool.setuptools.package-data]
 dytr = [
     "py.typed",
-    "**/*.json",
-    "**/*.txt",
+    #"**/*.json",
+    #"**/*.txt",
 ]
 
 [tool.setuptools.dynamic]
