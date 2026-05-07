@@ -1,7 +1,9 @@
 include LICENSE
 include NOTICE
 include README.md
+include CODE_OF_CONDUCT.md
+include SECURITY.md
+include CONTRIBUTING.md
 include pyproject.toml
+include requirements.txt
 recursive-include src/dytr *.py
-recursive-include src/dytr *.json
-recursive-include src/dytr *.txt
