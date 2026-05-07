@@ -66,6 +66,17 @@ pip install dytr
 pip install git+https://github.com/AAlsubari/dytr.git
 ```
 
+## 🎮 Interactive dytr Studio
+
+[![Open Studio](https://img.shields.io/badge/launch-dytr%20studio-6c63ff?style=for-the-badge)](https://AAlsubari.github.io/dytr/)
+
+**No-code transformer configuration tool** — Build multi-task models visually, generate ready-to-run Python code.
+
+- Adjust architecture parameters in real-time
+- Add classification, NER, generation tasks visually
+- Copy the generated dytr code for your project
+
+
 ## Quick Start
 
 ```python
