@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>dytr Studio · Complete Multi‑Task Transformer Builder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        :root {
+            --bg: #0a0c12;
+            --bg2: #0f1117;
+            --bg3: #171b24;
+            --text: #eef2ff;
+            --text2: #a5b4fc;
+            --text3: #6c757d;
+            --accent: #6c63ff;
+            --accent2: #00d4ff;
+            --accent3: #ff6b6b;
+            --accent4: #00c896;
+            --border: #2a2f3f;
+            --card: #12161f;
+            --shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        [data-theme="light"] {
+            --bg: #f1f5f9;
+            --bg2: #ffffff;
+            --bg3: #eef2ff;
+            --text: #0f172a;
+            --text2: #334155;
+            --text3: #64748b;
+            --border: #cbd5e1;
+            --card: #ffffff;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 1rem;
+        }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .logo p { font-size: 0.75rem; color: var(--text2); }
+        .theme-toggle {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+            color: var(--text);
+        }
+        .builder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 1.5rem;
+        }
+        .panel {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 1.2rem;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .panel-header {
+            padding: 0.9rem 1.2rem;
+            background: var(--bg3);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .panel-body { padding: 1.2rem; }
+        [data-tip] {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dashed var(--accent2);
+        }
+        [data-tip]:before {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 130%;
+            left: 0;
+            background: var(--bg3);
+            color: var(--text2);
+            padding: 0.3rem 0.7rem;
+            border-radius: 0.6rem;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0;
+            transition: 0.15s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        [data-tip]:hover:before { opacity: 1; transform: translateY(-2px); }
+        @media (max-width: 640px) { [data-tip]:before { white-space: normal; width: 180px; bottom: auto; top: 100%; left: 0; } }
+        .slider-group { margin-bottom: 1rem; }
+        .slider-label { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.2rem; }
+        input[type="range"] { width: 100%; background: var(--bg3); height: 4px; border-radius: 4px; -webkit-appearance: none; }
+        input[type="range"]:focus { outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; margin: 0.7rem 0; }
+        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-knob { position: absolute; cursor: pointer; inset: 0; background-color: var(--border); border-radius: 34px; transition: 0.2s; }
+        .toggle-knob:before { content: ""; position: absolute; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; border-radius: 50%; transition: 0.2s; }
+        input:checked + .toggle-knob { background-color: var(--accent); }
+        input:checked + .toggle-knob:before { transform: translateX(22px); }
+        .task-card {
+            background: var(--bg3);
+            border-radius: 0.9rem;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            border-left: 4px solid var(--accent);
+        }
+        .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .task-name { font-weight: 700; }
+        .task-type { font-size: 0.7rem; background: var(--bg2); padding: 0.2rem 0.6rem; border-radius: 2rem; }
+        .remove-task { background: none; border: none; color: var(--accent3); cursor: pointer; font-size: 1.2rem; }
+        .form-row { margin-bottom: 0.8rem; }
+        .form-row label { display: block; font-size: 0.7rem; margin-bottom: 0.2rem; color: var(--text2); }
+        select, input, textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.7rem;
+            border-radius: 0.6rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        pre, code { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; background: var(--bg); }
+        .code-panel pre {
+            padding: 1rem;
+            overflow-x: auto;
+            max-height: 500px;
+            background: var(--bg);
+            color: var(--text);
+            border-radius: 0.8rem;
+        }
+        .btn-copy { background: var(--accent); border: none; padding: 0.4rem 1rem; border-radius: 2rem; color: white; font-weight: 500; cursor: pointer; }
+        .badge-param { background: var(--bg3); border-radius: 2rem; padding: 0.2rem 0.7rem; font-size: 0.7rem; font-family: monospace; }
+        .info-note { background: var(--bg3); border-radius: 0.8rem; padding: 0.8rem; font-size: 0.75rem; margin-top: 0.8rem; color: var(--text2); }
+        hr { margin: 0.8rem 0; border-color: var(--border); }
+        .three-columns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; }
+        @media (max-width: 700px) { .three-columns { grid-template-columns: 1fr; } body { padding: 0.8rem; } .panel-header { flex-direction: column; align-items: stretch; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo"><h1>⚡ dytr Studio</h1><p>complete transformer builder · multi‑task · continual learning · LoRA · pretrained</p></div>
+        <button class="theme-toggle" id="themeButton">🌙 Dark</button>
+    </div>
+
+    <div class="builder-grid">
+        <div class="panel">
+            <div class="panel-header"><span>🧠 core architecture</span><span class="badge-param" id="paramCount">params: —</span></div>
+            <div class="panel-body">
+                <div class="slider-group"><div class="slider-label"><span data-tip="Hidden dimension (quadratic parameter impact)">embed_dim</span><span id="val_embed_dim">256</span></div><input type="range" id="embed_dim" min="64" max="1024" step="32" value="256"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Number of transformer encoder layers">num_layers</span><span id="val_num_layers">6</span></div><input type="range" id="num_layers" min="2" max="24" step="1" value="6"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Attention heads (must divide embed_dim)">num_heads</span><span id="val_num_heads">8</span></div><input type="range" id="num_heads" min="2" max="16" step="1" value="8"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="head_dim (auto = embed_dim/num_heads)">head_dim</span><span id="val_head_dim">32</span></div><input type="range" id="head_dim" min="8" max="128" step="8" value="32"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="FFN inner dimension multiplier">ff_mult</span><span id="val_ff_mult">4</span></div><input type="range" id="ff_mult" min="1" max="8" step="1" value="4"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Maximum sequence length (O(n²) memory)">max_seq_len</span><span id="val_max_seq_len">256</span></div><input type="range" id="max_seq_len" min="64" max="1024" step="32" value="256"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Dropout rate for regularization">dropout</span><span id="val_dropout">0.1</span></div><input type="range" id="dropout" min="0" max="0.5" step="0.05" value="0.1"></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header"><span>⚙️ training & optimization</span></div>
+            <div class="panel-body">
+                <div class="slider-group"><div class="slider-label"><span data-tip="Batch size per device">batch_size</span><span id="val_batch_size">16</span></div><input type="range" id="batch_size" min="4" max="128" step="4" value="16"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Learning rate (actual = value × 1e-4)">learning_rate (×1e-4)</span><span id="val_lr">3.0</span></div><input type="range" id="learning_rate" min="0.5" max="10" step="0.5" value="3.0"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Number of training epochs">num_train_epochs</span><span id="val_epochs">5</span></div><input type="range" id="epochs" min="1" max="30" step="1" value="5"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Weight decay (L2 regularization)">weight_decay</span><span id="val_weight_decay">0.01</span></div><input type="range" id="weight_decay" min="0" max="0.1" step="0.005" value="0.01"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Gradient clipping max norm">gradient_clip</span><span id="val_grad_clip">1.0</span></div><input type="range" id="gradient_clip" min="0.1" max="5" step="0.1" value="1.0"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Warmup steps for LR scheduler">warmup_steps</span><span id="val_warmup">1000</span></div><input type="range" id="warmup_steps" min="0" max="5000" step="100" value="1000"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Label smoothing factor">label_smoothing</span><span id="val_label_smooth">0.1</span></div><input type="range" id="label_smoothing" min="0" max="0.3" step="0.01" value="0.1"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Early stopping patience">patience</span><span id="val_patience">3</span></div><input type="range" id="patience" min="1" max="10" step="1" value="3"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Maximum learning rate (cosine scheduler)">max_learning_rate (×1e-4)</span><span id="val_max_lr">5.0</span></div><input type="range" id="max_learning_rate" min="1" max="20" step="0.5" value="5.0"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Minimum learning rate (cosine scheduler)">min_learning_rate (×1e-6)</span><span id="val_min_lr">1.0</span></div><input type="range" id="min_learning_rate" min="0.1" max="10" step="0.5" value="1.0"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Adam epsilon for numerical stability">adam_epsilon (×1e-8)</span><span id="val_adam_eps">1.0</span></div><input type="range" id="adam_epsilon" min="0.1" max="10" step="0.5" value="1.0"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Gradient accumulation steps">gradient_accumulation_steps</span><span id="val_grad_acc">1</span></div><input type="range" id="gradient_accumulation_steps" min="1" max="8" step="1" value="1"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="LR scheduler type">lr_scheduler_type</span><select id="lr_scheduler_type"><option value="cosine">cosine</option><option value="linear">linear</option><option value="constant">constant</option></select></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header"><span>🧠 task-specific learning rates</span></div>
+            <div class="panel-body">
+                <div class="slider-group"><div class="slider-label"><span data-tip="Learning rate multiplier for shared encoder layers">shared_lr_mult</span><span id="val_shared_lr">0.5</span></div><input type="range" id="shared_lr_mult" min="0.1" max="1.5" step="0.05" value="0.5"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Learning rate multiplier for task-specific heads">head_lr_mult</span><span id="val_head_lr">1.0</span></div><input type="range" id="head_lr_mult" min="0.5" max="3.0" step="0.1" value="1.0"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Learning rate multiplier for task decoders">decoder_lr_mult</span><span id="val_decoder_lr">1.0</span></div><input type="range" id="decoder_lr_mult" min="0.5" max="3.0" step="0.1" value="1.0"></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header"><span>🧠 continual learning & adapters</span></div>
+            <div class="panel-body">
+                <div class="toggle-row"><span data-tip="Adds task‑specific bottleneck layers">use_task_adapters</span><label class="toggle-switch"><input type="checkbox" id="use_task_adapters" checked><span class="toggle-knob"></span></label></div>
+                <div class="toggle-row"><span data-tip="Rotary Position Embedding (RoPE)">use_rotary_embedding</span><label class="toggle-switch"><input type="checkbox" id="use_rotary_embedding" checked><span class="toggle-knob"></span></label></div>
+                <div class="toggle-row"><span data-tip="Elastic Weight Consolidation (EWC)">use_ewc</span><label class="toggle-switch"><input type="checkbox" id="use_ewc"><span class="toggle-knob"></span></label></div>
+                <div class="toggle-row"><span data-tip="Experience replay buffer">use_replay</span><label class="toggle-switch"><input type="checkbox" id="use_replay"><span class="toggle-knob"></span></label></div>
+                <div class="toggle-row"><span data-tip="Flash Attention (faster, lower memory)">use_flash_attention</span><label class="toggle-switch"><input type="checkbox" id="use_flash_attention"><span class="toggle-knob"></span></label></div>
+                <div class="toggle-row"><span data-tip="Gradient checkpointing (memory save)">gradient_checkpointing</span><label class="toggle-switch"><input type="checkbox" id="gradient_checkpointing"><span class="toggle-knob"></span></label></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Adapter bottleneck dimension">adapter_bottleneck</span><span id="val_adapter_bn">64</span></div><input type="range" id="adapter_bottleneck" min="8" max="128" step="8" value="64"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="EWC regularization strength">ewc_lambda</span><span id="val_ewc_lambda">1000</span></div><input type="range" id="ewc_lambda" min="50" max="5000" step="50" value="1000"></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="Replay buffer size">replay_buffer_size</span><span id="val_replay_size">1000</span></div><input type="range" id="replay_buffer_size" min="100" max="5000" step="100" value="1000"></div>
+                <div class="toggle-row"><span data-tip="LoRA fine‑tuning mode">LoRA mode</span><select id="lora_mode" style="width: auto;"><option value="none">None</option><option value="single">Single (shared)</option><option value="multi">Multi-task</option><option value="progressive">Progressive</option></select></div>
+                <div class="slider-group"><div class="slider-label"><span data-tip="LoRA rank (r)">LoRA rank</span><span id="val_lora_rank">8</span></div><input type="range" id="lora_rank" min="1" max="64" step="1" value="8"></div>
+                <div class="toggle-row"><span data-tip="Use pretrained model (BERT/GPT/T5)">use_pretrained</span><label class="toggle-switch"><input type="checkbox" id="use_pretrained"><span class="toggle-knob"></span></label></div>
+                <div class="form-row"><label data-tip="HuggingFace model name">Pretrained model name</label><input type="text" id="pretrained_model_name" value="bert-base-uncased" placeholder="bert-base-uncased, gpt2, t5-small"></div>
+                <div class="toggle-row"><span data-tip="Training from scratch (adds special tokens)">training_from_scratch</span><label class="toggle-switch"><input type="checkbox" id="training_from_scratch"><span class="toggle-knob"></span></label></div>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="panel">
+                <div class="panel-header"><span>📋 tasks & datasets</span><button id="openTaskModalBtn" class="btn-copy" style="background: var(--bg3);">+ Add task</button></div>
+                <div class="panel-body" id="tasksContainer"><div class="info-note">✨ No tasks defined. Click "Add task" and configure columns.</div></div>
+                <div class="footer-actions" style="padding: 0 1.2rem 1.2rem 1.2rem; display: flex; justify-content: flex-end;"><button id="exportCodeBtn" class="btn-copy">📋 Copy Python code</button></div>
+            </div>
+            <div class="panel code-panel">
+                <div class="panel-header"><span>💻 generated dytr code</span><span style="font-size:0.7rem;">ready to run</span></div>
+                <div class="panel-body" style="padding: 0;"><pre id="codeOutput"><code># configure your model above</code></pre></div>
+            </div>
+        </div>
+    </div>
+    <div class="info-note" style="text-align: center; margin-top: 1.5rem;">
+    🧠 <strong>dytr</strong> — Dynamic Transformer Library | 
+    <a href="https://github.com/AAlsubari/dytr" style="color: var(--accent);">GitHub</a> | 
+    <a href="https://pypi.org/project/dytr" style="color: var(--accent2);">PyPI</a>
+</div>
+</div>
+
+<div id="taskModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:1000; backdrop-filter:blur(3px);">
+    <div style="background: var(--bg2); max-width: 560px; width: 90%; border-radius: 1.5rem; padding: 1.5rem; border: 1px solid var(--border); max-height: 85vh; overflow-y: auto;">
+        <h3>➕ define new task</h3>
+        <div class="form-row"><label>Task name</label><input type="text" id="newTaskName" placeholder="sentiment"></div>
+        <div class="form-row"><label>Strategy</label><select id="newTaskType"><option value="classification">Sentence classification</option><option value="token">Token classification (NER/tags)</option><option value="seq2seq">Seq2Seq</option><option value="causal">Causal LM</option></select></div>
+        <div id="dynamicFields"></div>
+        <div class="form-row"><label>Max length</label><input type="number" id="modal_maxlen" value="128"></div>
+        <div class="form-row"><label>Train dataset (CSV path)</label><input type="text" id="modal_train_path" placeholder="train.csv"></div>
+        <div class="form-row"><label>Validation dataset (optional)</label><input type="text" id="modal_val_path" placeholder="val.csv"></div>
+        <div style="display:flex; gap:1rem; justify-content:flex-end; margin-top:1rem;">
+            <button id="closeModalBtn" style="background:var(--bg3); border:none; padding:0.5rem 1rem; border-radius:2rem;">Cancel</button>
+            <button id="confirmTaskBtn" class="btn-copy">Add task</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let tasks = [];
+
+    function getConfig() {
+        return {
+            embed_dim: parseInt(document.getElementById('embed_dim').value),
+            num_layers: parseInt(document.getElementById('num_layers').value),
+            num_heads: parseInt(document.getElementById('num_heads').value),
+            head_dim: parseInt(document.getElementById('head_dim').value),
+            ff_mult: parseInt(document.getElementById('ff_mult').value),
+            max_seq_len: parseInt(document.getElementById('max_seq_len').value),
+            dropout: parseFloat(document.getElementById('dropout').value),
+            batch_size: parseInt(document.getElementById('batch_size').value),
+            learning_rate: parseFloat(document.getElementById('learning_rate').value) / 1e4,
+            num_train_epochs: parseInt(document.getElementById('epochs').value),
+            weight_decay: parseFloat(document.getElementById('weight_decay').value),
+            gradient_clip: parseFloat(document.getElementById('gradient_clip').value),
+            warmup_steps: parseInt(document.getElementById('warmup_steps').value),
+            label_smoothing: parseFloat(document.getElementById('label_smoothing').value),
+            patience: parseInt(document.getElementById('patience').value),
+            max_learning_rate: parseFloat(document.getElementById('max_learning_rate').value) / 1e4,
+            min_learning_rate: parseFloat(document.getElementById('min_learning_rate').value) / 1e6,
+            adam_epsilon: parseFloat(document.getElementById('adam_epsilon').value) / 1e8,
+            gradient_accumulation_steps: parseInt(document.getElementById('gradient_accumulation_steps').value),
+            lr_scheduler_type: document.getElementById('lr_scheduler_type').value,
+            shared_lr_mult: parseFloat(document.getElementById('shared_lr_mult').value),
+            head_lr_mult: parseFloat(document.getElementById('head_lr_mult').value),
+            decoder_lr_mult: parseFloat(document.getElementById('decoder_lr_mult').value),
+            use_task_adapters: document.getElementById('use_task_adapters').checked,
+            use_rotary_embedding: document.getElementById('use_rotary_embedding').checked,
+            use_ewc: document.getElementById('use_ewc').checked,
+            use_replay: document.getElementById('use_replay').checked,
+            use_flash_attention: document.getElementById('use_flash_attention').checked,
+            gradient_checkpointing: document.getElementById('gradient_checkpointing').checked,
+            adapter_bottleneck: parseInt(document.getElementById('adapter_bottleneck').value),
+            ewc_lambda: parseFloat(document.getElementById('ewc_lambda').value),
+            replay_buffer_size: parseInt(document.getElementById('replay_buffer_size').value),
+            lora_mode: document.getElementById('lora_mode').value,
+            lora_rank: parseInt(document.getElementById('lora_rank').value),
+            use_pretrained: document.getElementById('use_pretrained').checked,
+            pretrained_model_name: document.getElementById('pretrained_model_name').value.trim(),
+            training_from_scratch: document.getElementById('training_from_scratch').checked
+        };
+    }
+
+    function updateUI() {
+        let embed = parseInt(document.getElementById('embed_dim').value);
+        let heads = parseInt(document.getElementById('num_heads').value);
+        let expected = embed / heads;
+        let headVal = parseInt(document.getElementById('head_dim').value);
+        document.getElementById('val_head_dim').innerHTML = headVal + (Math.abs(headVal - expected) > 0.1 ? ` ⚠️ expected ${expected}` : '');
+        document.getElementById('val_embed_dim').innerText = embed;
+        document.getElementById('val_num_layers').innerText = document.getElementById('num_layers').value;
+        document.getElementById('val_num_heads').innerText = heads;
+        document.getElementById('val_ff_mult').innerText = document.getElementById('ff_mult').value;
+        document.getElementById('val_max_seq_len').innerText = document.getElementById('max_seq_len').value;
+        document.getElementById('val_dropout').innerText = parseFloat(document.getElementById('dropout').value).toFixed(2);
+        document.getElementById('val_batch_size').innerText = document.getElementById('batch_size').value;
+        document.getElementById('val_lr').innerText = parseFloat(document.getElementById('learning_rate').value).toFixed(1);
+        document.getElementById('val_epochs').innerText = document.getElementById('epochs').value;
+        document.getElementById('val_weight_decay').innerText = parseFloat(document.getElementById('weight_decay').value).toFixed(3);
+        document.getElementById('val_grad_clip').innerText = document.getElementById('gradient_clip').value;
+        document.getElementById('val_warmup').innerText = document.getElementById('warmup_steps').value;
+        document.getElementById('val_label_smooth').innerText = parseFloat(document.getElementById('label_smoothing').value).toFixed(2);
+        document.getElementById('val_patience').innerText = document.getElementById('patience').value;
+        document.getElementById('val_max_lr').innerText = parseFloat(document.getElementById('max_learning_rate').value).toFixed(1);
+        document.getElementById('val_min_lr').innerText = parseFloat(document.getElementById('min_learning_rate').value).toFixed(1);
+        document.getElementById('val_adam_eps').innerText = parseFloat(document.getElementById('adam_epsilon').value).toFixed(1);
+        document.getElementById('val_grad_acc').innerText = document.getElementById('gradient_accumulation_steps').value;
+        document.getElementById('val_shared_lr').innerText = parseFloat(document.getElementById('shared_lr_mult').value).toFixed(2);
+        document.getElementById('val_head_lr').innerText = parseFloat(document.getElementById('head_lr_mult').value).toFixed(2);
+        document.getElementById('val_decoder_lr').innerText = parseFloat(document.getElementById('decoder_lr_mult').value).toFixed(2);
+        document.getElementById('val_adapter_bn').innerText = document.getElementById('adapter_bottleneck').value;
+        document.getElementById('val_ewc_lambda').innerText = document.getElementById('ewc_lambda').value;
+        document.getElementById('val_replay_size').innerText = document.getElementById('replay_buffer_size').value;
+        document.getElementById('val_lora_rank').innerText = document.getElementById('lora_rank').value;
+        let total = (embed ** 2) * document.getElementById('num_layers').value * 4 + embed * 30522;
+        document.getElementById('paramCount').innerHTML = `params: ~${(total/1e6).toFixed(1)}M`;
+    }
+
+    function renderTasks() {
+        const container = document.getElementById('tasksContainer');
+        if (!tasks.length) { container.innerHTML = '<div class="info-note">✨ No tasks defined. Click "Add task" and configure columns.</div>'; return; }
+        container.innerHTML = tasks.map((t, idx) => `
+            <div class="task-card">
+                <div class="task-header"><span class="task-name">${escapeHtml(t.name)}</span><span class="task-type">${t.type}</span><button class="remove-task" data-idx="${idx}">✕</button></div>
+                <div style="font-size:0.7rem; color:var(--text2); display:flex; flex-wrap:wrap; gap:0.3rem 0.8rem;">
+                    ${t.type === 'classification' ? `text: ${t.text_col} · label: ${t.label_col} · num_labels: auto` : ''}
+                    ${t.type === 'token' ? `text: ${t.text_col} · tags_column: ${t.tags_col} · num_labels: auto` : ''}
+                    ${t.type === 'seq2seq' ? `source: ${t.source_col} · target: ${t.target_col}` : ''}
+                    ${t.type === 'causal' ? `text_column: ${t.text_col}` : ''}
+                    max_len: ${t.max_length}<br>📁 train: ${t.train_path || '—'} ${t.val_path ? `| val: ${t.val_path}` : ''}
+                </div>
+            </div>
+        `).join('');
+        document.querySelectorAll('.remove-task').forEach(btn => btn.addEventListener('click', (e) => { tasks.splice(parseInt(btn.dataset.idx),1); renderTasks(); generateCode(); }));
+        generateCode();
+    }
+
+    function escapeHtml(str) { return str.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]); }
+
+    function boolPy(val) { return val ? 'True' : 'False'; }
+
+    function generateCode() {
+        const cfg = getConfig();
+        let lines = [];
+        lines.push("from dytr import DynamicTransformer, ModelConfig, TaskConfig, TrainingStrategy, Trainer, SingleDatasetProcessing, PretrainedModelLoader");
+        if (cfg.lora_mode !== 'none') lines.push("from dytr.training.lora import LoRATrainer");
+        lines.push("import pandas as pd\n");
+        lines.push(`config = ModelConfig(`);
+        lines.push(`    embed_dim=${cfg.embed_dim}, num_layers=${cfg.num_layers}, num_heads=${cfg.num_heads}, head_dim=${cfg.head_dim},`);
+        lines.push(`    ff_mult=${cfg.ff_mult}, max_seq_len=${cfg.max_seq_len}, dropout=${cfg.dropout}, batch_size=${cfg.batch_size},`);
+        lines.push(`    learning_rate=${cfg.learning_rate}, num_train_epochs=${cfg.num_train_epochs}, weight_decay=${cfg.weight_decay},`);
+        lines.push(`    gradient_clip=${cfg.gradient_clip}, warmup_steps=${cfg.warmup_steps}, label_smoothing=${cfg.label_smoothing},`);
+        lines.push(`    patience=${cfg.patience}, max_learning_rate=${cfg.max_learning_rate}, min_learning_rate=${cfg.min_learning_rate},`);
+        lines.push(`    adam_epsilon=${cfg.adam_epsilon}, gradient_accumulation_steps=${cfg.gradient_accumulation_steps},`);
+        lines.push(`    lr_scheduler_type="${cfg.lr_scheduler_type}", shared_lr_mult=${cfg.shared_lr_mult},`);
+        lines.push(`    head_lr_mult=${cfg.head_lr_mult}, decoder_lr_mult=${cfg.decoder_lr_mult},`);
+        lines.push(`    use_task_adapters=${boolPy(cfg.use_task_adapters)}, use_rotary_embedding=${boolPy(cfg.use_rotary_embedding)},`);
+        lines.push(`    use_ewc=${boolPy(cfg.use_ewc)}, use_replay=${boolPy(cfg.use_replay)},`);
+        lines.push(`    use_flash_attention=${boolPy(cfg.use_flash_attention)}, gradient_checkpointing=${boolPy(cfg.gradient_checkpointing)},`);
+        lines.push(`    adapter_bottleneck=${cfg.adapter_bottleneck}, ewc_lambda=${cfg.ewc_lambda},`);
+        lines.push(`    replay_buffer_size=${cfg.replay_buffer_size}, training_from_scratch=${boolPy(cfg.training_from_scratch)},`);
+        lines.push(`)\n`);
+        lines.push(`if ${boolPy(cfg.use_pretrained)} and "${cfg.pretrained_model_name}":`);
+        lines.push(`    loader = PretrainedModelLoader()`);
+        lines.push(`    model = loader.load_pretrained("${cfg.pretrained_model_name}", config)`);
+        lines.push(`else:`);
+        lines.push(`    model = DynamicTransformer(config)\n`);
+        if (tasks.length) {
+            for (let t of tasks) {
+                let strat = t.type === 'classification' ? 'TrainingStrategy.SENTENCE_CLASSIFICATION' : (t.type === 'token' ? 'TrainingStrategy.TOKEN_CLASSIFICATION' : (t.type === 'seq2seq' ? 'TrainingStrategy.SEQ2SEQ' : 'TrainingStrategy.CAUSAL_LM'));
+                
+                if (t.train_path) {
+                    lines.push(`df_train_${t.name} = pd.read_csv("${t.train_path}")`);
+                    if (t.type === 'token') {
+                        lines.push(`train_ds_${t.name} = SingleDatasetProcessing(df_train_${t.name}, model.tokenizer, task_${t.name}.max_length, "${t.name}", ${strat}, tags_column="${t.tags_col}", text_column="${t.text_col}")`);
+                    } else if (t.type === 'seq2seq') {
+                        lines.push(`train_ds_${t.name} = SingleDatasetProcessing(df_train_${t.name}, model.tokenizer, task_${t.name}.max_length, "${t.name}", ${strat}, source_column="${t.source_col}", target_column="${t.target_col}")`);
+                    } else if (t.type === 'classification') {
+                        lines.push(`train_ds_${t.name} = SingleDatasetProcessing(df_train_${t.name}, model.tokenizer, task_${t.name}.max_length, "${t.name}", ${strat}, text_column="${t.text_col}", label_column="${t.label_col}")`);
+                    } else {
+                        lines.push(`train_ds_${t.name} = SingleDatasetProcessing(df_train_${t.name}, model.tokenizer, task_${t.name}.max_length, "${t.name}", ${strat}, text_column="${t.text_col}")`);
+                    }
+                    //lines.push(`num_labels_auto = train_ds_${t.name}.num_labels`);
+                    lines.push(`task_${t.name} = TaskConfig(task_name="${t.name}", training_strategy=${strat}, max_length=${t.max_length},num_labels = train_ds_${t.name}.num_labels)`);
+                    //lines.push(`model.add_task(task_${t.name})`);
+                    if (t.val_path) {
+                        lines.push(`df_val_${t.name} = pd.read_csv("${t.val_path}")`);
+                        if (t.type === 'token') {
+                            lines.push(`val_ds_${t.name} = SingleDatasetProcessing(df_val_${t.name}, model.tokenizer, task_${t.name}.max_length, "${t.name}", ${strat}, tags_column="${t.tags_col}", text_column="${t.text_col}", label_to_ids=train_ds_${t.name}.label_to_ids)`);
+                        } else if (t.type === 'seq2seq') {
+                            lines.push(`val_ds_${t.name} = SingleDatasetProcessing(df_val_${t.name}, model.tokenizer, task_${t.name}.max_length, "${t.name}", ${strat}, source_column="${t.source_col}", target_column="${t.target_col}")`);
+                        } else if (t.type === 'classification') {
+                            lines.push(`val_ds_${t.name} = SingleDatasetProcessing(df_val_${t.name}, model.tokenizer, task_${t.name}.max_length, "${t.name}", ${strat}, text_column="${t.text_col}", label_column="${t.label_col}", label_to_ids=train_ds_${t.name}.label_to_ids)`);
+                        } else {
+                            lines.push(`val_ds_${t.name} = SingleDatasetProcessing(df_val_${t.name}, model.tokenizer, task_${t.name}.max_length, "${t.name}", ${strat}, text_column="${t.text_col}")`);
+                        }
+                    }
+                }
+                lines.push("");
+            }
+            lines.push(`train_datasets = {}`);
+            lines.push(`val_datasets = {}`);
+            for (let t of tasks) if(t.train_path) { let strat = t.type === 'classification' ? 'TrainingStrategy.SENTENCE_CLASSIFICATION' : (t.type === 'token' ? 'TrainingStrategy.TOKEN_CLASSIFICATION' : (t.type === 'seq2seq' ? 'TrainingStrategy.SEQ2SEQ' : 'TrainingStrategy.CAUSAL_LM')); lines.push(`train_datasets["${t.name}"] = (train_ds_${t.name}, ${strat})`); }
+            for (let t of tasks) if(t.val_path) { let strat = t.type === 'classification' ? 'TrainingStrategy.SENTENCE_CLASSIFICATION' : (t.type === 'token' ? 'TrainingStrategy.TOKEN_CLASSIFICATION' : (t.type === 'seq2seq' ? 'TrainingStrategy.SEQ2SEQ' : 'TrainingStrategy.CAUSAL_LM')); lines.push(`val_datasets["${t.name}"] = (val_ds_${t.name}, ${strat})`); }
+            lines.push(`\nif ${boolPy(cfg.lora_mode !== 'none')}:`);
+            lines.push(`    trainer = LoRATrainer(model, config, mode="${cfg.lora_mode}", rank=${cfg.lora_rank})`);
+            lines.push(`else:`);
+            lines.push(`    trainer = Trainer(model, config, exp_dir='./dytr_output')`);
+            lines.push(`trained_model = trainer.train([${tasks.map(t => `task_${t.name}`).join(", ")}], train_datasets, val_datasets)`);
+            lines.push(`\nresult = trained_model.generate("Your text here", task_name="${tasks[0].name}")`);
+            lines.push(`print(result)`);
+        }
+        const codeElement = document.getElementById('codeOutput');
+        codeElement.innerHTML = `<code>${escapeHtml(lines.join('\n'))}</code>`;
+        const theme = document.documentElement.getAttribute('data-theme');
+        codeElement.style.backgroundColor = 'var(--bg)';
+        codeElement.style.color = 'var(--text)';
+    }
+
+    function updateModalFields() {
+        const type = document.getElementById('newTaskType').value;
+        const container = document.getElementById('dynamicFields');
+        if (type === 'classification') {
+            container.innerHTML = `<div class="form-row"><label>Text column</label><input id="modal_textCol" value="text"></div><div class="form-row"><label>Label column</label><input id="modal_labelCol" value="label"></div>`;
+        } else if (type === 'token') {
+            container.innerHTML = `<div class="form-row"><label>Text column</label><input id="modal_textCol" value="text"></div><div class="form-row"><label>Tags column (token labels)</label><input id="modal_tagsCol" value="tags"></div>`;
+        } else if (type === 'seq2seq') {
+            container.innerHTML = `<div class="form-row"><label>Source column</label><input id="modal_sourceCol" value="source"></div><div class="form-row"><label>Target column</label><input id="modal_targetCol" value="target"></div>`;
+        } else {
+            container.innerHTML = `<div class="form-row"><label>Text column</label><input id="modal_textCol" value="text"></div>`;
+        }
+    }
+
+    const modal = document.getElementById('taskModal');
+    document.getElementById('openTaskModalBtn').onclick = () => { modal.style.display = 'flex'; updateModalFields(); };
+    document.getElementById('closeModalBtn').onclick = () => { modal.style.display = 'none'; };
+    document.getElementById('confirmTaskBtn').onclick = () => {
+        let name = document.getElementById('newTaskName').value.trim();
+        if (!name) { alert("Task name required"); return; }
+        let type = document.getElementById('newTaskType').value;
+        let taskObj = { name, type, max_length: parseInt(document.getElementById('modal_maxlen').value), train_path: document.getElementById('modal_train_path').value, val_path: document.getElementById('modal_val_path').value };
+        if (type === 'classification') {
+            taskObj.text_col = document.getElementById('modal_textCol').value;
+            taskObj.label_col = document.getElementById('modal_labelCol').value;
+        } else if (type === 'token') {
+            taskObj.text_col = document.getElementById('modal_textCol').value;
+            taskObj.tags_col = document.getElementById('modal_tagsCol').value;
+        } else if (type === 'seq2seq') {
+            taskObj.source_col = document.getElementById('modal_sourceCol').value;
+            taskObj.target_col = document.getElementById('modal_targetCol').value;
+        } else {
+            taskObj.text_col = document.getElementById('modal_textCol').value;
+        }
+        tasks.push(taskObj);
+        renderTasks();
+        modal.style.display = 'none';
+        document.getElementById('newTaskName').value = '';
+    };
+    document.getElementById('newTaskType').addEventListener('change', updateModalFields);
+
+    const allInputs = ['embed_dim','num_layers','num_heads','head_dim','ff_mult','max_seq_len','dropout','batch_size','learning_rate','epochs','weight_decay','gradient_clip','warmup_steps','label_smoothing','patience','max_learning_rate','min_learning_rate','adam_epsilon','gradient_accumulation_steps','lr_scheduler_type','shared_lr_mult','head_lr_mult','decoder_lr_mult','adapter_bottleneck','ewc_lambda','replay_buffer_size','lora_rank','lora_mode','use_task_adapters','use_rotary_embedding','use_ewc','use_replay','use_flash_attention','gradient_checkpointing','use_pretrained','pretrained_model_name','training_from_scratch'
+    ];
+    allInputs.forEach(id => {
+        let el = document.getElementById(id);
+        if(el) el.addEventListener('input', () => { updateUI(); generateCode(); });
+        if(el && el.type === 'checkbox') el.addEventListener('change', () => { updateUI(); generateCode(); });
+    });
+    document.getElementById('exportCodeBtn').onclick = () => { navigator.clipboard.writeText(document.getElementById('codeOutput').innerText); alert("✅ dytr code copied!"); };
+    const themeBtn = document.getElementById('themeButton');
+    let dark =  true;
+    themeBtn.onclick = () => { dark = !dark; document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light'); themeBtn.innerText = dark ? '🌙 Dark' : '☀️ Light'; generateCode(); };
+    updateUI(); renderTasks(); generateCode();
+    updateModalFields();
+</script>
+</body>
+  </html>
